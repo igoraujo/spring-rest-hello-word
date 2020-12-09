@@ -29,17 +29,16 @@ public class BookController {
     Book saveOrUpdate(@PathVariable Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new BookNotFoundException(id));
-
     }
 
     @PutMapping("/books/{id}")
     Book saveOrUpdate(@RequestBody Book newBook, @PathVariable Long id) {
         return repository.findById(id)
-                .map(x -> {
-                     x.setName(newBook.getName());
-                     x.setAuthor(newBook.getAuthor());
-                     x.setPrice(newBook.getPrice());
-                     return repository.save(x);
+                .map(book -> {
+                     book.setName(newBook.getName());
+                     book.setAuthor(newBook.getAuthor());
+                     book.setPrice(newBook.getPrice());
+                     return repository.save(book);
                 })
                 .orElseGet(() -> {
                     newBook.setId(id);
@@ -51,13 +50,13 @@ public class BookController {
     Book patch(@RequestBody Map<String, String> update, @PathVariable Long id) {
 
         return repository.findById(id)
-                .map(x -> {
+                .map(book -> {
                     String author = update.get("author");
                     if (!author.isEmpty()) {
-                        x.setAuthor(author);
+                        book.setAuthor(author);
 
                         // better create a custom method to update a value = :newValue where id = :id
-                        return repository.save(x);
+                        return repository.save(book);
                     } else {
                         throw new BookUnSupportedFieldPatchException(update.keySet());
                     }
@@ -66,7 +65,6 @@ public class BookController {
                 .orElseGet(() -> {
                     throw new BookNotFoundException(id);
                 });
-
     }
 
     @DeleteMapping("/books/{id}")
